@@ -31,7 +31,7 @@ SbtPgp.autoImport.useGpg := true
 
 SbtPgp.autoImport.useGpgAgent := true
 
-libraryDependencies := Seq(
+libraryDependencies ++= Seq(
   "org.specs2" %% "specs2-core" % "3.9.2" % "test"
 )
 
@@ -60,3 +60,9 @@ pomExtra := {
       </developer>
     </developers>
 }
+
+connectInput in run := true
+
+fork in run := true
+
+lazy val root = project in file(".")
