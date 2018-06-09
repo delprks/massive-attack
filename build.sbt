@@ -1,4 +1,4 @@
-name := "simple-thrift-loadtest"
+name := "simple-load-test"
 
 version := "0.1"
 
@@ -40,7 +40,7 @@ pomIncludeRepository := {
 }
 
 pomExtra := {
-  <url>https://github.com/delprks/simple-thrift-loadtest</url>
+  <url>https://github.com/delprks/simple-load-test</url>
     <licenses>
       <license>
         <name>Apache 2</name>
@@ -49,8 +49,8 @@ pomExtra := {
       </license>
     </licenses>
     <scm>
-      <url>git@github.com:delprks/simple-thrift-loadtest.git</url>
-      <connection>scm:git@github.com:delprks/simple-thrift-loadtest.git</connection>
+      <url>git@github.com:delprks/simple-load-test.git</url>
+      <connection>scm:git@github.com:delprks/simple-load-test.git</connection>
     </scm>
     <developers>
       <developer>
