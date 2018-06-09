@@ -7,9 +7,9 @@ import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParArray
 import scala.concurrent.{ExecutionContext, Future}
 
-class ThriftLoadTestSpec(
-  invocations: Int = 5000,
-  threads: Int = 14,
+class ThriftLoadTest(
+  invocations: Int = 10000,
+  threads: Int = 20,
   duration: Int = 30,
   warmUp: Boolean = true,
   warmUpInvocations: Int = 100
