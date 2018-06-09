@@ -1,8 +1,8 @@
-package com.delprks.thrift
+package com.delprks.slt.thrift
 
 import scala.concurrent.Future
 
-trait Timer {
+trait LoadGenerator {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def measure(method: => Future[Any]): Future[Long] = {
