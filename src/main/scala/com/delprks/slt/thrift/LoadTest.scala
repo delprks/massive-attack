@@ -3,9 +3,8 @@ package com.delprks.slt.thrift
 import java.util.concurrent.Executors
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
-import scala.collection.parallel._
 import scala.collection.parallel.ForkJoinTaskSupport
+import scala.concurrent.{ExecutionContext, Future}
 
 object LoadTest extends App with LoadGenerator {
   val invocations = args(0).toInt
@@ -28,8 +27,7 @@ object LoadTest extends App with LoadGenerator {
 
   val parallelInvocation = (1 to invocations).toParArray
 
-  parallelInvocation.tasksupport = new ForkJoinTaskSupport(
-    new java.util.concurrent.ForkJoinPool(parallelism))
+  parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(parallelism))
 
   val results: ListBuffer[Future[Long]] = execute()
 
