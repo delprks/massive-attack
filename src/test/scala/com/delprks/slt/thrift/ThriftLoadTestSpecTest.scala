@@ -13,7 +13,7 @@ class ThriftLoadTestSpecTest extends Specification {
 
   "PlayableItemMapper" should {
     "load test first expensive method" in {
-      val loadTestSpec = new ThriftLoadTest(threads = 600, invocations = 50000)
+      val loadTestSpec = new ThriftLoadTest(threads = 800, invocations = 5000000, duration = 60)
 
       loadTestSpec.test(() => longRunningMethod())
 
