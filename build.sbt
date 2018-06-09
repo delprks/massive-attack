@@ -32,6 +32,7 @@ SbtPgp.autoImport.useGpg := true
 SbtPgp.autoImport.useGpgAgent := true
 
 libraryDependencies ++= Seq(
+  "org.scala-sbt" % "test-interface" % "1.0",
   "org.specs2" %% "specs2-core" % "3.9.2" % "test"
 )
 

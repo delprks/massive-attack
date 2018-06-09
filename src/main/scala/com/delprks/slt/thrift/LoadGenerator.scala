@@ -24,4 +24,6 @@ trait LoadGenerator {
 
     truncateAt(rps, 2)
   }
+
+
 }
