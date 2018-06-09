@@ -1,9 +1,13 @@
 package com.delprks.thrift
 
 import scala.concurrent.Future
+import scala.collection.parallel._
+import scala.collection.parallel.ForkJoinTaskSupport
+import scala.collection.parallel.mutable.ParArray
 
 object LoadTest extends App with Timer {
   val invocations = args(0).toInt
+  val parallelism = args(1).toInt
 
   println(s"Invoking long running method $invocations times")
 
@@ -17,7 +21,12 @@ object LoadTest extends App with Timer {
 
   val testStartTime = System.currentTimeMillis()
 
-  val results: Seq[Future[Long]] = (1 to invocations).map(_ => measure(longRunningMethod()))
+  val parallelInvocation = (1 to invocations).toParArray
+
+  parallelInvocation.tasksupport = new ForkJoinTaskSupport(
+    new java.util.concurrent.ForkJoinPool(parallelism))
+
+  val results: ParArray[Future[Long]] = parallelInvocation.map(_ => measure(longRunningMethod()))
 
   results.foreach {
     _.map(result => println(s"$result milliseconds"))
