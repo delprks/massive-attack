@@ -5,7 +5,10 @@ import java.util.concurrent.Executors
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParArray
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import com.twitter.util.{Future => TwitterFuture, Promise => TwitterPromise, Return, Throw}
+import scala.concurrent.{Future => ScalaFuture, Promise => ScalaPromise, ExecutionContext}
+import scala.util.{Success, Failure}
 
 class ThriftLoadTest(
   invocations: Int = 10000,
@@ -17,7 +20,18 @@ class ThriftLoadTest(
 
   private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(threads))
 
-  def test(longRunningMethod: () => Future[Any]) = {
+  def asScala[A](tf: TwitterFuture[A])(implicit e: ExecutionContext): ScalaFuture[A] = {
+    val promise: ScalaPromise[A] = ScalaPromise()
+
+    tf.respond {
+      case Return(value) => promise.success(value)
+      case Throw(exception) => promise.failure(exception)
+    }
+
+    promise.future
+  }
+
+  def test(longRunningMethod: () => ScalaFuture[_]) = {
     if (warmUp) {
       println(s"Warming up the JVM...")
 
@@ -35,13 +49,13 @@ class ThriftLoadTest(
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(threads))
 
-    val results: ListBuffer[Future[Long]] = execute(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[ScalaFuture[Long]] = execute(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
 
     case class TestResult(min: Long, max: Long, average: Double)
 
-    val testResultsF = Future.sequence(results).map { response =>
+    val testResultsF = ScalaFuture.sequence(results).map { response =>
       val average = truncateAt(avg(response), 2)
 
       TestResult(response.min, response.max, average)
@@ -60,8 +74,8 @@ class ThriftLoadTest(
 
   }
 
-  def execute(parallelInvocation: ParArray[Int], longRunningMethod: () => Future[Any], testEndTime: Long): ListBuffer[Future[Long]] = {
-    var i = new ListBuffer[Future[Long]]
+  def execute(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[Long]] = {
+    var i = new ListBuffer[ScalaFuture[Long]]
 
     parallelInvocation.par.foreach { _ =>
       i += measure(longRunningMethod())
