@@ -1,4 +1,4 @@
-name := "simple-load-test"
+name := "massive-attack"
 
 version := "0.1"
 
@@ -42,7 +42,7 @@ pomIncludeRepository := {
 }
 
 pomExtra := {
-  <url>https://github.com/delprks/simple-load-test</url>
+  <url>https://github.com/delprks/massive-attack</url>
     <licenses>
       <license>
         <name>Apache 2</name>
@@ -51,8 +51,8 @@ pomExtra := {
       </license>
     </licenses>
     <scm>
-      <url>git@github.com:delprks/simple-load-test.git</url>
-      <connection>scm:git@github.com:delprks/simple-load-test.git</connection>
+      <url>git@github.com:delprks/massive-attack.git</url>
+      <connection>scm:git@github.com:delprks/massive-attack.git</connection>
     </scm>
     <developers>
       <developer>
@@ -68,3 +68,4 @@ connectInput in run := true
 fork in run := true
 
 lazy val root = project in file(".")
+
