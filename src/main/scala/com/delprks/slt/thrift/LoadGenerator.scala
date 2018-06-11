@@ -5,7 +5,7 @@ import scala.concurrent.Future
 trait LoadGenerator {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def measure(method: => Future[Any]): Future[Long] = {
+  def measure(method: => Future[_]): Future[Long] = {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
@@ -24,4 +24,6 @@ trait LoadGenerator {
 
     truncateAt(rps, 2)
   }
+
+
 }
