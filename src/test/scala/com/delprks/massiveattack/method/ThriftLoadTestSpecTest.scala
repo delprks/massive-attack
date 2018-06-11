@@ -1,4 +1,4 @@
-package com.delprks.slt.thrift
+package com.delprks.massiveattack.method
 
 import org.specs2.mutable.Specification
 
@@ -13,7 +13,7 @@ class ThriftLoadTestSpecTest extends Specification {
 
   "PlayableItemMapper" should {
     "load test first expensive method" in {
-      val loadTestSpec = new ThriftLoadTest(threads = 600, invocations = 5000000, duration = 20)
+      val loadTestSpec = new MethodLoadTest(threads = 600, invocations = 5000000, duration = 20)
 
       loadTestSpec.test(() => longRunningMethod())
 

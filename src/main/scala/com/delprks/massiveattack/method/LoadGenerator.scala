@@ -1,11 +1,22 @@
-package com.delprks.slt.thrift
+package com.delprks.massiveattack.method
 
 import scala.concurrent.Future
+import com.twitter.util.{Future => TwitterFuture, Return, Throw}
 
 trait LoadGenerator {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def measure(method: => Future[_]): Future[Long] = {
+    val currentTime = System.currentTimeMillis()
+
+    method map { _ =>
+      val timeAfterExecution = System.currentTimeMillis()
+
+      timeAfterExecution - currentTime
+    }
+  }
+
+  def measure(method: => TwitterFuture[_]): TwitterFuture[Long] = {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
