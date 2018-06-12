@@ -5,9 +5,9 @@ import java.util.concurrent.Executors
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParArray
-import com.twitter.util.{Future => TwitterFuture, Return, Throw}
+import com.twitter.util.{Future => TwitterFuture}
 
-import scala.concurrent.{Future => ScalaFuture, Promise => ScalaPromise, ExecutionContext}
+import scala.concurrent.{Future => ScalaFuture, ExecutionContext}
 
 class MethodLoadTest(
   invocations: Int = 10000,
@@ -35,7 +35,7 @@ class MethodLoadTest(
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(threads))
 
-    val results: ListBuffer[TwitterFuture[Long]] = executeTwitterMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[TwitterFuture[MeasureResult]] = measureTwitterMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
 
@@ -47,7 +47,9 @@ class MethodLoadTest(
       println(s"Average: ${response.average}ms")
       println(s"Invocations: ${results.size}")
       println(s"Duration: ${truncateAt(testDuration / 1000, 2)}s")
-      println(s"Requests: ${rps(testDuration.toDouble, results.size)}rps")
+      println(s"Average requests: ${response.rpsAvg}rps")
+      println(s"Min requests: ${response.rpsMin}rps")
+      println(s"Max requests: ${response.rpsMax}rps")
 
       System.exit(0)
     }
@@ -69,7 +71,7 @@ class MethodLoadTest(
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(threads))
 
-    val results: ListBuffer[ScalaFuture[Long]] = executeScalaMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[ScalaFuture[MeasureResult]] = measureScalaMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
 
@@ -81,31 +83,41 @@ class MethodLoadTest(
       println(s"Average: ${response.average}ms")
       println(s"Invocations: ${results.size}")
       println(s"Duration: ${truncateAt(testDuration / 1000, 2)}s")
-      println(s"Requests: ${rps(testDuration.toDouble, results.size)}rps")
+      println(s"Average requests: ${response.rpsAvg}rps")
+      println(s"Min requests: ${response.rpsMin}rps")
+      println(s"Max requests: ${response.rpsMax}rps")
 
       System.exit(0)
     }
 
   }
 
-  private def scalaTestResults(results: ListBuffer[ScalaFuture[Long]]): ScalaFuture[TestResult] = ScalaFuture.sequence(results).map { response =>
-    val average = truncateAt(avg(response), 2)
+  private def scalaTestResults(results: ListBuffer[ScalaFuture[MeasureResult]]): ScalaFuture[TestResult] = ScalaFuture.sequence(results).map { response =>
+    val average = truncateAt(avg(response.map(_.duration)), 2)
+    val invocationSeconds = response.map(_.endTime / 1000)
+    val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
 
-    TestResult(response.min, response.max, average)
+    val rpsAverage = truncateAt(avg(requestTimesPerSecond.map(_.toLong).toSeq), 2)
+
+    TestResult(response.map(_.duration).min, response.map(_.duration).max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage)
   }
 
-  private def twitterTestResults(results: ListBuffer[TwitterFuture[Long]]): TwitterFuture[TestResult] = TwitterFuture.collect(results).map { response =>
-    val average = truncateAt(avg(response), 2)
+  private def twitterTestResults(results: ListBuffer[TwitterFuture[MeasureResult]]): TwitterFuture[TestResult] = TwitterFuture.collect(results).map { response =>
+    val average = truncateAt(avg(response.map(_.duration)), 2)
+    val invocationSeconds = response.map(_.endTime / 1000)
+    val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
 
-    TestResult(response.min, response.max, average)
+    val rpsAverage = truncateAt(avg(requestTimesPerSecond.map(_.toLong).toSeq), 2)
+
+    TestResult(response.map(_.duration).min, response.map(_.duration).max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage)
   }
 
   private def warmUpScalaMethod(longRunningMethod: () => ScalaFuture[_]) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
 
   private def warmUpTwitterMethod(longRunningMethod: () => TwitterFuture[_]) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
 
-  def executeScalaMethod(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[Long]] = {
-    var testResult = new ListBuffer[ScalaFuture[Long]]
+  def measureScalaMethod(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[MeasureResult]] = {
+    var testResult = new ListBuffer[ScalaFuture[MeasureResult]]
 
     parallelInvocation.par.foreach { _ =>
       testResult += measure(longRunningMethod())
@@ -118,8 +130,8 @@ class MethodLoadTest(
     testResult
   }
 
-  def executeTwitterMethod(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ListBuffer[TwitterFuture[Long]] = {
-    var testResult = new ListBuffer[TwitterFuture[Long]]
+  def measureTwitterMethod(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ListBuffer[TwitterFuture[MeasureResult]] = {
+    var testResult = new ListBuffer[TwitterFuture[MeasureResult]]
 
     parallelInvocation.par.foreach { _ =>
       testResult += measure(longRunningMethod())
