@@ -9,29 +9,23 @@ import com.twitter.util.{Future => TwitterFuture}
 
 import scala.concurrent.{Future => ScalaFuture, ExecutionContext}
 
-class MethodLoadTest(
-  invocations: Int = 10000,
-  threads: Int = 20,
-  duration: Int = 30,
-  warmUp: Boolean = true,
-  warmUpInvocations: Int = 100
-) extends LoadGenerator {
+class MethodLoadTest(props: MethodTestProperties = MethodTestProperties()) extends LoadGenerator {
 
-  private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(threads))
+  private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads))
 
   def test(longRunningMethod: () => TwitterFuture[_]) = {
-    if (warmUp) {
+    if (props.warmUp) {
       println(s"Warming up the JVM...")
 
       warmUpTwitterMethod(longRunningMethod)
     }
 
-    println(s"Invoking long running method $invocations times - or maximum $duration seconds")
+    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
 
     val testStartTime = System.currentTimeMillis()
-    val testEndTime = testStartTime + duration * 1000
-    val parallelInvocation: ParArray[Int] = (1 to invocations).toParArray
-    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(threads))
+    val testEndTime = testStartTime + props.duration * 1000
+    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
+    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
     val results: ListBuffer[TwitterFuture[MeasureResult]] = measureTwitterMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
     val testResultsF: TwitterFuture[TestResult] = twitterTestResults(results)
@@ -42,18 +36,18 @@ class MethodLoadTest(
   }
 
   def test(longRunningMethod: () => ScalaFuture[_]) = {
-    if (warmUp) {
+    if (props.warmUp) {
       println(s"Warming up the JVM...")
 
       warmUpScalaMethod(longRunningMethod)
     }
 
-    println(s"Invoking long running method $invocations times - or maximum $duration seconds")
+    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
 
     val testStartTime = System.currentTimeMillis()
-    val testEndTime = testStartTime + duration * 1000
-    val parallelInvocation: ParArray[Int] = (1 to invocations).toParArray
-    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(threads))
+    val testEndTime = testStartTime + props.duration * 1000
+    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
+    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
     val results: ListBuffer[ScalaFuture[MeasureResult]] = measureScalaMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
     val testResultsF: ScalaFuture[TestResult] = scalaTestResults(results)
@@ -83,9 +77,9 @@ class MethodLoadTest(
     TestResult(response.map(_.duration).min, response.map(_.duration).max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, response.size)
   }
 
-  private def warmUpScalaMethod(longRunningMethod: () => ScalaFuture[_]) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
+  private def warmUpScalaMethod(longRunningMethod: () => ScalaFuture[_]) = (1 to props.warmUpInvocations).foreach(_ => longRunningMethod())
 
-  private def warmUpTwitterMethod(longRunningMethod: () => TwitterFuture[_]) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
+  private def warmUpTwitterMethod(longRunningMethod: () => TwitterFuture[_]) = (1 to props.warmUpInvocations).foreach(_ => longRunningMethod())
 
   def measureScalaMethod(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[MeasureResult]] = {
     var testResult = new ListBuffer[ScalaFuture[MeasureResult]]
