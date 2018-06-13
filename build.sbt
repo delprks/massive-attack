@@ -33,7 +33,11 @@ SbtPgp.autoImport.useGpgAgent := true
 
 libraryDependencies ++= Seq(
   "com.twitter" %% "util-core" % "18.5.0",
+  "com.twitter" %% "finagle-thriftmux" % "18.5.0",
   "org.scala-sbt" % "test-interface" % "1.0",
+//  "ch.qos.logback" % "logback-classic" % "1.2.3",
+//  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
+  "bbc.rms" %% "sounds-metadata" % "0.1-SNAPSHOT",
   "org.specs2" %% "specs2-core" % "3.9.2" % "test"
 )
 
