@@ -5,11 +5,10 @@ import com.twitter.util.{Future => TwitterFuture}
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.mutable.ParArray
-import scala.concurrent.{Future => ScalaFuture}
+import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 import scala.reflect.ClassTag
 
-class MethodOps {
-  import scala.concurrent.ExecutionContext.Implicits.global
+class MethodOps()(implicit ec: ExecutionContext) {
 
   def measure(parallelInvocation: => ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[MeasureResult]] = {
     var testResult = new ListBuffer[ScalaFuture[MeasureResult]]

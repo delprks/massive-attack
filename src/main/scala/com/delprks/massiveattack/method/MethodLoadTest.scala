@@ -14,8 +14,11 @@ import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties()) {
 
   private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads))
-  private val methodOps = new MethodOps()
-  private val resultOps = new ResultOps()
+
+  private val opsEC: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(20))
+
+  private val methodOps = new MethodOps()(opsEC)
+  private val resultOps = new ResultOps()(opsEC)
 
   def test(longRunningMethod: () => TwitterFuture[_]): TwitterFuture[MassiveAttackResult] = {
     if (props.warmUp) {
@@ -35,7 +38,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val results: ListBuffer[TwitterFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
-    val testResultsF: TwitterFuture[MassiveAttackResult] = resultOps.twitterTestResults(results)
+    val testResultsF: TwitterFuture[MassiveAttackResult] = resultOps.testResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")
 
@@ -60,7 +63,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val results: ListBuffer[ScalaFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Long = System.currentTimeMillis() - testStartTime
-    val testResultsF: ScalaFuture[MassiveAttackResult] = resultOps.scalaTestResults(results)
+    val testResultsF: ScalaFuture[MassiveAttackResult] = resultOps.testResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")
 

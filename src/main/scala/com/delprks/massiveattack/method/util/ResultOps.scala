@@ -3,14 +3,13 @@ package com.delprks.massiveattack.method.util
 import com.delprks.massiveattack.method.{MassiveAttackResult, MeasureResult}
 import com.twitter.util.{Future => TwitterFuture}
 
-import scala.concurrent.{Future => ScalaFuture}
+import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
 
-class ResultOps {
+class ResultOps()(implicit ec: ExecutionContext) {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-  def scalaTestResults(results: ListBuffer[ScalaFuture[MeasureResult]]): ScalaFuture[MassiveAttackResult] = ScalaFuture.sequence(results).map { response =>
+  def testResults(results: ListBuffer[ScalaFuture[MeasureResult]]): ScalaFuture[MassiveAttackResult] = ScalaFuture.sequence(results).map { response =>
     val responseDuration = response.map(_.duration.toInt)
     val average = avg(responseDuration)
     val invocationSeconds = response.map(_.endTime / 1000)
@@ -21,7 +20,7 @@ class ResultOps {
     MassiveAttackResult(responseDuration.min, responseDuration.max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, response.size)
   }
 
-  def twitterTestResults(results: ListBuffer[TwitterFuture[MeasureResult]]): TwitterFuture[MassiveAttackResult] = TwitterFuture.collect(results).map { response =>
+  def testResults[X: ClassTag](results: ListBuffer[TwitterFuture[MeasureResult]]): TwitterFuture[MassiveAttackResult] = TwitterFuture.collect(results).map { response =>
     val responseDuration = response.map(_.duration.toInt)
     val average = avg(responseDuration)
     val invocationSeconds = response.map(_.endTime / 1000)
