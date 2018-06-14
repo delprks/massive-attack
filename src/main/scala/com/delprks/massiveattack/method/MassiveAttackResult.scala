@@ -1,16 +1,14 @@
 package com.delprks.massiveattack.method
 
-import com.delprks.massiveattack.method.util.ResultOps
-
 case class MassiveAttackResult(
-  minResponseTime: Long,
-  maxResponseTime: Long,
+  minResponseTime: Int,
+  maxResponseTime: Int,
   averageResponseTime: Int,
-  rpsMin: Long,
-  rpsMax: Long,
+  rpsMin: Int,
+  rpsMax: Int,
   rpsAvg: Int,
   requests: Int
-) extends ResultOps {
+) {
   override def toString: String = {
     s"""
        |Min: ${minResponseTime}ms
