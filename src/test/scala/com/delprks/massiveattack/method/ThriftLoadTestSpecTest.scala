@@ -1,49 +1,37 @@
 package com.delprks.massiveattack.method
 
-import bbc.rms.metadata.thriftscala.{PlayableItem, ProgrammesService}
-import bbc.rms.metadata.thriftscala.ProgrammesService.PlayableItems
-import com.twitter.finagle.{Thrift, client}
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.util
 import org.specs2.mutable.Specification
 
-import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class ThriftLoadTestSpecTest extends Specification {
-  //  def longRunningMethod(): Future[Seq[String]] = {
-  //    Thread.sleep(20)
-  //
-  //    Future.successful(Seq("Method finished running"))
-  //  }
-  //
-  //  "PlayableItemMapper" should {
-  //    "load test first expensive method" in {
-  //      val loadTestSpec = new MethodLoadTest(threads = 600, invocations = 5000000, duration = 20)
-  //
-  //      loadTestSpec.test(() => longRunningMethod())
-  //
-  //      1 shouldEqual (1)
-  //    }
-  //  }
+  protected val futureSupportTimeout: Duration = 5.second
 
-  "Playable endpoint should perform well" in {
-    val host = "localhost:9911"
+  sequential
 
-    val client: ProgrammesService.MethodPerEndpoint = Thrift.client.build[ProgrammesService.MethodPerEndpoint](host)
+  def longRunningMethod(): Future[Seq[String]] = {
+    Thread.sleep(20)
 
-    val pids = Seq()
+    Future.successful(Seq("Method finished running"))
+  }
 
-    val testProperties = MethodTestProperties(
-      threads = 20,
-      invocations = 10000000,
-      duration = 310
+  "load test first expensive method" in {
+    val testProperties = MassiveAttackProperties(
+      invocations = 100000,
+      threads = 1,
+      duration = 30,
+      warmUp = true,
+      warmUpInvocations = 1000,
+      verbose = false
     )
 
     val loadTestSpec = new MethodLoadTest(testProperties)
+    val testResultF: Future[MassiveAttackResult] = loadTestSpec.test(() => longRunningMethod())
 
-    loadTestSpec.test(() => client.playableItems(pids))
+    val testResult = Await.result(testResultF, futureSupportTimeout)
 
-    1 shouldEqual 1
+//    testResult.averageResponseTime must beLessThanOrEqualTo(40)
+    1 must be equalTo(1)
   }
 }

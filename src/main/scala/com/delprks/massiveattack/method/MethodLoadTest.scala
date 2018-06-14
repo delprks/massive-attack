@@ -10,7 +10,7 @@ import com.twitter.util.{Future => TwitterFuture}
 
 import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 
-class MethodLoadTest(props: MethodTestProperties = MethodTestProperties()) extends LoadGenerator {
+class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties()) extends LoadGenerator {
 
   private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads))
 
@@ -62,7 +62,7 @@ class MethodLoadTest(props: MethodTestProperties = MethodTestProperties()) exten
   }
 
   private def scalaTestResults(results: ListBuffer[ScalaFuture[MeasureResult]]): ScalaFuture[MassiveAttackResult] = ScalaFuture.sequence(results).map { response =>
-    val average = truncateAt(avg(response.map(_.duration)), 2)
+    val average = truncateAt(avg(response.map(_.duration)), 2).toInt
     val invocationSeconds = response.map(_.endTime / 1000)
     val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
 
@@ -72,7 +72,7 @@ class MethodLoadTest(props: MethodTestProperties = MethodTestProperties()) exten
   }
 
   private def twitterTestResults(results: ListBuffer[TwitterFuture[MeasureResult]]): TwitterFuture[MassiveAttackResult] = TwitterFuture.collect(results).map { response =>
-    val average = truncateAt(avg(response.map(_.duration)), 2)
+    val average = truncateAt(avg(response.map(_.duration)), 2).toInt
     val invocationSeconds = response.map(_.endTime / 1000)
     val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
 
