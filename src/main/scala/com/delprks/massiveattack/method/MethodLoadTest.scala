@@ -20,7 +20,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     if (props.warmUp) {
       println(s"Warming up the JVM...")
 
-      warmUpTwitterMethod(longRunningMethod)
+      methodOps.warmUpMethod(longRunningMethod, props.warmUpInvocations)
     }
 
     println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
@@ -31,7 +31,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
 
-    val results: ListBuffer[TwitterFuture[MeasureResult]] = methodOps.measureTwitterMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[TwitterFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
     val testResultsF: TwitterFuture[MassiveAttackResult] = twitterTestResults(results)
@@ -45,7 +45,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     if (props.warmUp) {
       println(s"Warming up the JVM...")
 
-      warmUpScalaMethod(longRunningMethod)
+      methodOps.warmUpMethod(longRunningMethod, props.warmUpInvocations)
     }
 
     println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
@@ -56,7 +56,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
 
-    val results: ListBuffer[ScalaFuture[MeasureResult]] = methodOps.measureScalaMethod(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[ScalaFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MassiveAttackResult] = scalaTestResults(results)
@@ -87,9 +87,5 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
 
     MassiveAttackResult(responseDuration.min, responseDuration.max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, response.size)
   }
-
-  private def warmUpScalaMethod(longRunningMethod: () => ScalaFuture[_]) = (1 to props.warmUpInvocations).foreach(_ => longRunningMethod())
-
-  private def warmUpTwitterMethod(longRunningMethod: () => TwitterFuture[_]) = (1 to props.warmUpInvocations).foreach(_ => longRunningMethod())
 
 }
