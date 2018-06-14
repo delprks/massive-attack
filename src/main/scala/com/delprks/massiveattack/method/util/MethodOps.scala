@@ -1,6 +1,6 @@
 package com.delprks.massiveattack.method.util
 
-import com.delprks.massiveattack.method.MeasureResult
+import com.delprks.massiveattack.method.result.MethodDurationResult
 import com.twitter.util.{Future => TwitterFuture}
 
 import scala.collection.mutable.ListBuffer
@@ -10,8 +10,8 @@ import scala.reflect.ClassTag
 
 class MethodOps()(implicit ec: ExecutionContext) {
 
-  def measure(parallelInvocation: => ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[MeasureResult]] = {
-    var testResult = new ListBuffer[ScalaFuture[MeasureResult]]
+  def measure(parallelInvocation: => ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ListBuffer[ScalaFuture[MethodDurationResult]] = {
+    var testResult = new ListBuffer[ScalaFuture[MethodDurationResult]]
 
     parallelInvocation.par.foreach { _ =>
       testResult += measureFutureDuration(longRunningMethod())
@@ -24,8 +24,8 @@ class MethodOps()(implicit ec: ExecutionContext) {
     testResult
   }
 
-  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ListBuffer[TwitterFuture[MeasureResult]] = {
-    var testResult = new ListBuffer[TwitterFuture[MeasureResult]]
+  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ListBuffer[TwitterFuture[MethodDurationResult]] = {
+    var testResult = new ListBuffer[TwitterFuture[MethodDurationResult]]
 
     parallelInvocation.par.foreach { _ =>
       testResult += measureFutureDuration(longRunningMethod())
@@ -38,23 +38,23 @@ class MethodOps()(implicit ec: ExecutionContext) {
     testResult
   }
 
-  private def measureFutureDuration(method: => ScalaFuture[_]): ScalaFuture[MeasureResult] = {
+  private def measureFutureDuration(method: => ScalaFuture[_]): ScalaFuture[MethodDurationResult] = {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
       val timeAfterExecution = System.currentTimeMillis()
 
-      MeasureResult(timeAfterExecution - currentTime, timeAfterExecution)
+      MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
     }
   }
 
-  private def measureFutureDuration(method: => TwitterFuture[_]): TwitterFuture[MeasureResult] = {
+  private def measureFutureDuration(method: => TwitterFuture[_]): TwitterFuture[MethodDurationResult] = {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
       val timeAfterExecution = System.currentTimeMillis()
 
-      MeasureResult(timeAfterExecution - currentTime, timeAfterExecution)
+      MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
     }
   }
 

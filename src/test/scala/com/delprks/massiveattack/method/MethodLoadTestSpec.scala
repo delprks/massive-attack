@@ -1,11 +1,12 @@
 package com.delprks.massiveattack.method
 
+import com.delprks.massiveattack.method.result.MassiveAttackResult
 import org.specs2.mutable.Specification
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class ThriftLoadTestSpecTest extends Specification {
+class MethodLoadTestSpec extends Specification {
   protected val futureSupportTimeout: Duration = 5.second
 
   sequential

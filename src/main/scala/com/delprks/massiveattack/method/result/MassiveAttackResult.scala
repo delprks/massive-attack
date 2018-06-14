@@ -1,4 +1,4 @@
-package com.delprks.massiveattack.method
+package com.delprks.massiveattack.method.result
 
 case class MassiveAttackResult(
   minResponseTime: Int,

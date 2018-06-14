@@ -2,6 +2,7 @@ package com.delprks.massiveattack.method
 
 import java.util.concurrent.Executors
 
+import com.delprks.massiveattack.method.result.{MassiveAttackResult, MethodDurationResult}
 import com.delprks.massiveattack.method.util.{MethodOps, ResultOps}
 
 import scala.collection.mutable.ListBuffer
@@ -35,7 +36,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
 
-    val results: ListBuffer[TwitterFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[TwitterFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
     val testResultsF: TwitterFuture[MassiveAttackResult] = resultOps.testResults(results)
@@ -60,7 +61,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
 
-    val results: ListBuffer[ScalaFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
+    val results: ListBuffer[ScalaFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MassiveAttackResult] = resultOps.testResults(results)
