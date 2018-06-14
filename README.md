@@ -23,32 +23,32 @@ So I decided to create one which is easy to use:
 
 1. Add it as a dependency to `build.sbt`:
 
-`libraryDependencies ++= Seq("com.delprks" %% "massive-attack" % "0.1" % "test")`
+`libraryDependencies ++= Seq("com.delprks" %% "massive-attack" % "1.0.0" % "test")`
 
 2. Create your test in [ScalaTest](http://www.scalatest.org) or [Specs2](https://etorreborre.github.io/specs2) (this library might change to be a testing framework in future)
 
 To test a long running method that returns a Future:
 
 ```scala
-"load test a long running method method" in {
-  val testProperties = MassiveAttackProperties(
-    invocations = 100000,
-    threads = 12,
-    duration = 300,
-    warmUp = true,
-    warmUpInvocations = 1000,
-    verbose = false
+"long running method should have average response times of less than 40ms" in {
+  val testProperties = MethodPerformanceProps(
+    invocations = 10000,
+    threads = 4,
+    duration = 20
   )
 
-  val loadTestSpec = new MethodLoadTest(testProperties)
-  val testResultF: Future[MassiveAttackResult] = loadTestSpec.test(() => longRunningMethod())
+  val methodPerformance = new MethodPerformance(testProperties)
 
-  val testResult = Await.result(testResultF, 1.second)
-
-  testResult.averageResponseTime must beLessThanOrEqualTo(20)
+  val testResultF: Future[MethodPerformanceResult] = methodPerformance.measure(() => longRunningMethod())
+  val testResult = Await.result(testResultF, futureSupportTimeout)
+  
+  testResult.averageResponseTime must beLessThanOrEqualTo(40)
 }
-
 ```
+
+Which will result in:
+
+![image](https://user-images.githubusercontent.com/8627976/41440647-3a6c5ea6-7027-11e8-9248-9923447834fb.png)
 
 <h2>Test properties</h2>
 

@@ -1,6 +1,8 @@
 package com.delprks.massiveattack.method.result
 
-case class MassiveAttackResult(
+import com.delprks.massiveattack.MassiveAttackResult
+
+case class MethodPerformanceResult(
   minResponseTime: Int,
   maxResponseTime: Int,
   averageResponseTime: Int,
@@ -8,7 +10,7 @@ case class MassiveAttackResult(
   rpsMax: Int,
   rpsAvg: Int,
   requests: Int
-) {
+) extends MassiveAttackResult {
   override def toString: String = {
     s"""
        |Min: ${minResponseTime}ms
