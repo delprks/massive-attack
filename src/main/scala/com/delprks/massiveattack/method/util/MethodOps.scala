@@ -59,8 +59,10 @@ class MethodOps {
     }
   }
 
-  def warmUpMethod(longRunningMethod: () => ScalaFuture[_], warmUpInvocations: Int) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
+  def warmUpMethod(longRunningMethod: () => ScalaFuture[_], warmUpInvocations: Int)=
+    (1 to warmUpInvocations).foreach(_ => longRunningMethod())
 
-  def warmUpMethod[X: ClassTag](longRunningMethod: () => TwitterFuture[_],warmUpInvocations: Int) = (1 to warmUpInvocations).foreach(_ => longRunningMethod())
+  def warmUpMethod[X: ClassTag](longRunningMethod: () => TwitterFuture[_], warmUpInvocations: Int)=
+    (1 to warmUpInvocations).foreach(_ => longRunningMethod())
 
 }

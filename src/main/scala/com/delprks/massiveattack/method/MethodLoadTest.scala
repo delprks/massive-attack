@@ -15,6 +15,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
 
   private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads))
   private val methodOps = new MethodOps()
+  private val resultOps = new ResultOps()
 
   def test(longRunningMethod: () => TwitterFuture[_]): TwitterFuture[MassiveAttackResult] = {
     if (props.warmUp) {
@@ -34,7 +35,7 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val results: ListBuffer[TwitterFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
-    val testResultsF: TwitterFuture[MassiveAttackResult] = twitterTestResults(results)
+    val testResultsF: TwitterFuture[MassiveAttackResult] = resultOps.twitterTestResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")
 
@@ -59,33 +60,11 @@ class MethodLoadTest(props: MassiveAttackProperties = MassiveAttackProperties())
     val results: ListBuffer[ScalaFuture[MeasureResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
     val testDuration: Long = System.currentTimeMillis() - testStartTime
-    val testResultsF: ScalaFuture[MassiveAttackResult] = scalaTestResults(results)
+    val testResultsF: ScalaFuture[MassiveAttackResult] = resultOps.scalaTestResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")
 
     testResultsF
-  }
-
-  private def scalaTestResults(results: ListBuffer[ScalaFuture[MeasureResult]]): ScalaFuture[MassiveAttackResult] = ScalaFuture.sequence(results).map { response =>
-    val responseDuration = response.map(_.duration.toInt)
-    val average = ResultOps.avg(responseDuration)
-    val invocationSeconds = response.map(_.endTime / 1000)
-    val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
-
-    val rpsAverage = ResultOps.avg(requestTimesPerSecond.toSeq)
-
-    MassiveAttackResult(responseDuration.min, responseDuration.max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, response.size)
-  }
-
-  private def twitterTestResults(results: ListBuffer[TwitterFuture[MeasureResult]]): TwitterFuture[MassiveAttackResult] = TwitterFuture.collect(results).map { response =>
-    val responseDuration = response.map(_.duration.toInt)
-    val average = ResultOps.avg(responseDuration)
-    val invocationSeconds = response.map(_.endTime / 1000)
-    val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
-
-    val rpsAverage = ResultOps.avg(requestTimesPerSecond.toSeq)
-
-    MassiveAttackResult(responseDuration.min, responseDuration.max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, response.size)
   }
 
 }
