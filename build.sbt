@@ -1,7 +1,5 @@
 name := "massive-attack"
 
-version := "0.1"
-
 scalaVersion := "2.12.6"
 
 organization := "com.delprks"
