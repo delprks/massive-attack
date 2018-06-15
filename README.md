@@ -1,7 +1,7 @@
 # massive-attack
 
 [![License](http://img.shields.io/:license-Apache%202-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.delprks/massive-attack/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.delprks%22%20AND%20a%3A%22massive-attack%22)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.delprks/massive-attack/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.delprks%22%20AND%20a%3A%22massive-attack_2.12%22)
 
 [![image](https://upload.wikimedia.org/wikipedia/en/a/a7/MassiveAttackBlueLines.jpg)](https://en.wikipedia.org/wiki/Blue_Lines)
 
