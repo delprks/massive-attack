@@ -20,7 +20,7 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
   private val opsEC: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(20))
 
   private val methodOps = new MethodOps()(opsEC)
-  private val resultOps = new ResultOps()(opsEC)
+  private val resultOps = new ResultOps()
 
   def measure(longRunningMethod: () => TwitterFuture[_]): TwitterFuture[MethodPerformanceResult] = {
     if (props.warmUp) {
@@ -35,7 +35,7 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
     val testEndTime = testStartTime + props.duration * 1000
 
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
-    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
+    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(props.threads))
 
     val results: ListBuffer[TwitterFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
@@ -60,11 +60,14 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
+
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
+    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(props.threads))
 
-    parallelInvocation.tasksupport = new ForkJoinTaskSupport(new java.util.concurrent.ForkJoinPool(props.threads))
+    val results: ListBuffer[ScalaFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime, props.threads)
 
-    val results: ListBuffer[ScalaFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
+
+    println("result size is " + results.size)
 
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)

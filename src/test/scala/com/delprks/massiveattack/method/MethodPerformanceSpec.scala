@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class MethodPerformanceSpec extends Specification {
-  protected lazy val futureSupportTimeout: Duration = 1.second
+  protected lazy val futureSupportTimeout: Duration = 2.minutes
 
   sequential
 
@@ -20,7 +20,7 @@ class MethodPerformanceSpec extends Specification {
   "long running method should have average response times of less than 40ms" in {
     val testProperties = MethodPerformanceProps(
       invocations = 10000,
-      threads = 4,
+      threads = 1,
       duration = 20
     )
 
