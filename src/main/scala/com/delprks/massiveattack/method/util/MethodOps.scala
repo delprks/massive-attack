@@ -16,23 +16,21 @@ class MethodOps()(implicit ec: ExecutionContext) {
 
     var counter = 0
 
-    val progressBar = new ProgressBar(longRunningMethod.getClass.getSimpleName, parallelInvocation.length)
-    progressBar.start()
+//    val progressBar = new ProgressBar(longRunningMethod.getClass.getSimpleName, parallelInvocation.length)
+//    progressBar.start()
 
     parallelInvocation.par.foreach { _ =>
       testResult += measureFutureDuration(longRunningMethod())
       counter += 1
 //      progressBar.stepBy(parallelism)
 
-//      println(testResult)
-
-      if (System.currentTimeMillis() >= testEndTime) {
-        println("count is " + counter + " and list size is " + testResult.size)
-        return testResult
-      }
+//      if (System.currentTimeMillis() >= testEndTime) {
+//        println("in foreach count is " + counter + " and list size is " + testResult.size)
+//        return testResult
+//      }
     }
 
-    println("count is " + counter + " and list size is " + testResult.size)
+//    println("outside foreach count is " + counter + " and list size is " + testResult.size)
     testResult
   }
 

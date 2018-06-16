@@ -1,29 +1,31 @@
 package com.delprks.massiveattack.method.util
 
-import com.delprks.massiveattack.method.result.{MethodPerformanceResult, MethodDurationResult}
+import com.delprks.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
 import com.twitter.util.{Future => TwitterFuture}
 
 import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
+import scala.util.Try
 
-class ResultOps() {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
-  import scala.concurrent.duration._
+class ResultOps()(implicit ec: ExecutionContext) {
 
   def testResults(results: ListBuffer[ScalaFuture[MethodDurationResult]]): ScalaFuture[MethodPerformanceResult] = {
     var counter = 0
-
-//    results.map{ r =>
-//      counter += 1
-//      r.map{v => println(v); println(counter)}
-//    }
+    import scala.util.{Failure, Success}
 
     println("response size right before sequence is " + results.length)
-    println(results)
 
-    ScalaFuture.sequence(results).map { response =>
+    def lift[T](futures: Seq[ScalaFuture[T]]) =
+      futures.map(_.map {
+        Success(_)
+      }.recover { case t => Failure(t) })
+
+    def waitAll[T](futures: Seq[ScalaFuture[T]]) =
+      ScalaFuture.sequence(lift(futures))
+
+    waitAll(results).map { tryResponse =>
+      val response: Seq[MethodDurationResult] = tryResponse.flatMap(_.toOption)
 
       println("response size in future is " + response.size)
 
@@ -36,8 +38,10 @@ class ResultOps() {
 
       MethodPerformanceResult(responseDuration.min, responseDuration.max, average, requestTimesPerSecond.min, requestTimesPerSecond.max, rpsAverage, results.size)
     }
+
   }
 
+  //use liftToTry (https://stackoverflow.com/questions/29344430/scala-waiting-for-sequence-of-futures)
   def testResults[X: ClassTag](results: ListBuffer[TwitterFuture[MethodDurationResult]]): TwitterFuture[MethodPerformanceResult] = TwitterFuture.collect(results).map { response =>
     val responseDuration = response.map(_.duration.toInt)
     val average = avg(responseDuration)

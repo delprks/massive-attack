@@ -19,9 +19,10 @@ class MethodPerformanceSpec extends Specification {
 
   "long running method should have average response times of less than 40ms" in {
     val testProperties = MethodPerformanceProps(
+      warmUp = false,
       invocations = 10000,
-      threads = 1,
-      duration = 20
+      threads = 2,
+      duration = 30
     )
 
     val methodPerformance = new MethodPerformance(testProperties)
