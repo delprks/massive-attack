@@ -1,13 +1,12 @@
-package com.delprks.massiveattack.method
+package com.delprks.massiveattack.method.result
 
 import akka.actor.Actor
-import com.delprks.massiveattack.method.result.MethodDurationResult
 
 import scala.collection.mutable.ListBuffer
 
 case object GetStats
 
-class Recorder extends Actor {
+class MethodStatsRecorder extends Actor {
   var stats: ListBuffer[MethodDurationResult] = ListBuffer.empty[MethodDurationResult]
 
   override def receive: Receive = {

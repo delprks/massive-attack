@@ -32,10 +32,9 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
 
   "long running method that returns a Scala Future should have average response times of less than 40ms" in {
     val testProperties = MethodPerformanceProps(
-      warmUp = false,
-      invocations = 2000000,
+      invocations = 10000,
       threads = 50,
-      duration = 20
+      duration = 35
     )
 
     val methodPerformance = new MethodPerformance(testProperties)
@@ -48,10 +47,9 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
 
   "long running method that returns a Twitter Future should have average response times of less than 40ms" in {
     val testProperties = MethodPerformanceProps(
-      warmUp = false,
-      invocations = 2000000,
+      invocations = 10000,
       threads = 50,
-      duration = 20
+      duration = 35
     )
 
     val methodPerformance = new MethodPerformance(testProperties)

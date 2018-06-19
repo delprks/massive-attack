@@ -1,8 +1,7 @@
 package com.delprks.massiveattack.method.util
 
 import akka.actor.{ActorSystem, Props}
-import com.delprks.massiveattack.method.{GetStats, Recorder}
-import com.delprks.massiveattack.method.result.MethodDurationResult
+import com.delprks.massiveattack.method.result.{GetStats, MethodDurationResult, MethodStatsRecorder}
 import com.twitter.util.{Future => TwitterFuture}
 
 import scala.collection.mutable.ListBuffer
@@ -12,6 +11,7 @@ import scala.reflect.ClassTag
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -19,7 +19,7 @@ import scala.language.postfixOps
 class MethodOps()(implicit ec: ExecutionContext) {
 
   private val system = ActorSystem("massive-attack")
-  private val recorder = system.actorOf(Props[Recorder], "test-result-recorder")
+  private val recorder = system.actorOf(Props[MethodStatsRecorder], "test-result-recorder")
   implicit val timeout: Timeout = Timeout(5.seconds)
 
   def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long, parallelism: Int): ScalaFuture[ListBuffer[MethodDurationResult]] = {
