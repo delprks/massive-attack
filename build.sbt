@@ -1,3 +1,6 @@
+import org.apache.logging.log4j.core.config.composite.MergeStrategy
+import sun.security.tools.PathList
+
 name := "massive-attack"
 
 crossScalaVersions := Seq("2.12.6", "2.11.12")
@@ -36,6 +39,7 @@ libraryDependencies ++= Seq(
   "me.tongfei" % "progressbar" % "0.4.0",
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
+  "com.typesafe.akka" %% "akka-actor" % "2.5.13",
   "org.specs2" %% "specs2-core" % "3.9.2" % "test"
 )
 

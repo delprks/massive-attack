@@ -2,6 +2,7 @@ package com.delprks.massiveattack.method
 
 import java.util.concurrent.Executors
 
+import akka.util.Timeout
 import com.delprks.massiveattack.MassiveAttack
 import com.delprks.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
 import com.delprks.massiveattack.method.util.{MethodOps, ResultOps}
@@ -11,50 +12,42 @@ import scala.collection.parallel.ForkJoinTaskSupport
 import scala.collection.parallel.mutable.ParArray
 import com.twitter.util.{Future => TwitterFuture}
 
+import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
+import scala.reflect.ClassTag
 
 class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()) extends MassiveAttack(props) {
 
-  private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1000))
-
-//  import scala.concurrent.ExecutionContext.Implicits._
-
-  private val opsEC: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1000))
+  private val opsEC: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads * 2))
+  private implicit val context: ExecutionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(props.threads * 2))
+  private implicit val timeout: Timeout = Timeout(5.seconds)
 
   private val methodOps = new MethodOps()(opsEC)
   private val resultOps = new ResultOps()(opsEC)
 
-  def measure(longRunningMethod: () => TwitterFuture[_]): TwitterFuture[MethodPerformanceResult] = {
+  override def measure(longRunningMethod: () => ScalaFuture[_]): ScalaFuture[MethodPerformanceResult] = {
     if (props.warmUp) {
       println(s"Warming up the JVM...")
 
       methodOps.warmUpMethod(longRunningMethod, props.warmUpInvocations)
     }
 
-    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
+    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads")
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
 
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
 
-    val forkJoinPool = new scala.concurrent.forkjoin.ForkJoinPool(props.threads)
-
+    val forkJoinPool = new ForkJoinPool(props.threads)
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
-    println("thread info:")
+    val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime, props.threads)
 
-    println(forkJoinPool.getActiveThreadCount)
-    println(forkJoinPool.getRunningThreadCount)
-    println(forkJoinPool.getParallelism)
-
-
-    val results: ListBuffer[TwitterFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
-
-    val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
-    val testResultsF: TwitterFuture[MethodPerformanceResult] = resultOps.testResults(results)
+    val testDuration: Long = System.currentTimeMillis() - testStartTime
+    val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")
 
@@ -63,32 +56,27 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
     testResultsF
   }
 
-  def measure(longRunningMethod: () => ScalaFuture[_]): ScalaFuture[MethodPerformanceResult] = {
+  override def measure[X: ClassTag](longRunningMethod: () => TwitterFuture[_]): ScalaFuture[MethodPerformanceResult] = {
     if (props.warmUp) {
       println(s"Warming up the JVM...")
 
       methodOps.warmUpMethod(longRunningMethod, props.warmUpInvocations)
     }
 
-    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds")
+    println(s"Invoking long running method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads")
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
 
     val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
 
-    val forkJoinPool = new ForkJoinPool(1)
+    val forkJoinPool = new scala.concurrent.forkjoin.ForkJoinPool(props.threads)
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
-    val results: ListBuffer[ScalaFuture[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime, props.threads)
+    val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => longRunningMethod(), testEndTime)
 
-    println("result size is" + results.size)
-
-
-    forkJoinPool.shutdown()
-
-    val testDuration: Long = System.currentTimeMillis() - testStartTime
+    val testDuration: Double = (System.currentTimeMillis() - testStartTime).toDouble
     val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
 
     println(s"Test finished. Duration: ${testDuration / 1000}s")

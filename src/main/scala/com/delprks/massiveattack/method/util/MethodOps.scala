@@ -1,70 +1,68 @@
 package com.delprks.massiveattack.method.util
 
+import akka.actor.{ActorSystem, Props}
+import com.delprks.massiveattack.method.{GetStats, Recorder}
 import com.delprks.massiveattack.method.result.MethodDurationResult
 import com.twitter.util.{Future => TwitterFuture}
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.mutable.ParArray
-import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
+import scala.concurrent.{Future => ScalaFuture}
 import scala.reflect.ClassTag
-import me.tongfei.progressbar.ProgressBar
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class MethodOps()(implicit ec: ExecutionContext) {
 
-  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long, parallelism: Int): ListBuffer[ScalaFuture[MethodDurationResult]] = {
-    var testResult = new ListBuffer[ScalaFuture[MethodDurationResult]]
+  private val system = ActorSystem("massive-attack")
+  private val recorder = system.actorOf(Props[Recorder], "test-result-recorder")
+  implicit val timeout: Timeout = Timeout(5.seconds)
 
-    var counter = 0
-
-//    val progressBar = new ProgressBar(longRunningMethod.getClass.getSimpleName, parallelInvocation.length)
-//    progressBar.start()
-
+  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long, parallelism: Int): ScalaFuture[ListBuffer[MethodDurationResult]] = {
     parallelInvocation.par.foreach { _ =>
-      testResult += measureFutureDuration(longRunningMethod())
-      counter += 1
-//      progressBar.stepBy(parallelism)
-
-//      if (System.currentTimeMillis() >= testEndTime) {
-//        println("in foreach count is " + counter + " and list size is " + testResult.size)
-//        return testResult
-//      }
-    }
-
-//    println("outside foreach count is " + counter + " and list size is " + testResult.size)
-    testResult
-  }
-
-  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ListBuffer[TwitterFuture[MethodDurationResult]] = {
-    var testResult = new ListBuffer[TwitterFuture[MethodDurationResult]]
-
-    parallelInvocation.par.foreach { _ =>
-      testResult += measureFutureDuration(longRunningMethod())
+      measureFutureDuration(longRunningMethod())
 
       if (System.currentTimeMillis() >= testEndTime) {
-        return testResult
+        return (recorder ? GetStats).asInstanceOf[Future[ListBuffer[MethodDurationResult]]]
       }
     }
 
-    testResult
+    (recorder ? GetStats).asInstanceOf[Future[ListBuffer[MethodDurationResult]]]
   }
 
-  private def measureFutureDuration(method: => ScalaFuture[_]): ScalaFuture[MethodDurationResult] = {
+  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ScalaFuture[ListBuffer[MethodDurationResult]] = {
+    parallelInvocation.par.foreach { _ =>
+      measureFutureDuration(longRunningMethod())
+
+      if (System.currentTimeMillis() >= testEndTime) {
+        return (recorder ? GetStats).asInstanceOf[Future[ListBuffer[MethodDurationResult]]]
+      }
+    }
+
+    (recorder ? GetStats).asInstanceOf[Future[ListBuffer[MethodDurationResult]]]
+  }
+
+  private def measureFutureDuration(method: => ScalaFuture[_])= {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
       val timeAfterExecution = System.currentTimeMillis()
 
-      MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
+      recorder ! MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
     }
   }
 
-  private def measureFutureDuration(method: => TwitterFuture[_]): TwitterFuture[MethodDurationResult] = {
+  private def measureFutureDuration(method: => TwitterFuture[_])= {
     val currentTime = System.currentTimeMillis()
 
     method map { _ =>
       val timeAfterExecution = System.currentTimeMillis()
 
-      MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
+      recorder ! MethodDurationResult(timeAfterExecution - currentTime, timeAfterExecution)
     }
   }
 
