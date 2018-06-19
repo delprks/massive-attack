@@ -1,6 +1,3 @@
-import org.apache.logging.log4j.core.config.composite.MergeStrategy
-import sun.security.tools.PathList
-
 name := "massive-attack"
 
 crossScalaVersions := Seq("2.12.6", "2.11.12")
