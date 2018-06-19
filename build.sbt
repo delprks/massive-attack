@@ -1,6 +1,9 @@
+import org.apache.logging.log4j.core.config.composite.MergeStrategy
+import sun.security.tools.PathList
+
 name := "massive-attack"
 
-scalaVersion := "2.12.6"
+crossScalaVersions := Seq("2.12.6", "2.11.12")
 
 organization := "com.delprks"
 
@@ -21,6 +24,8 @@ publishArtifact in Test := false
 
 parallelExecution in Test := false
 
+releaseCrossBuild := true
+
 sbtrelease.ReleasePlugin.autoImport.releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 sbtrelease.ReleasePlugin.autoImport.releaseCrossBuild := false
@@ -31,9 +36,9 @@ SbtPgp.autoImport.useGpgAgent := true
 
 libraryDependencies ++= Seq(
   "com.twitter" %% "util-core" % "18.5.0",
-  "com.twitter" %% "finagle-thriftmux" % "18.5.0",
-  "org.scala-sbt" % "test-interface" % "1.0",
-  "org.specs2" %% "specs2-core" % "3.9.2" % "test"
+  "com.typesafe.akka" %% "akka-actor" % "2.5.13",
+  "com.typesafe.akka" %% "akka-testkit" % "2.5.13" % Test,
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
 pomIncludeRepository := {
@@ -67,4 +72,3 @@ connectInput in run := true
 fork in run := true
 
 lazy val root = project in file(".")
-

@@ -7,6 +7,6 @@ case class MethodPerformanceProps(
   threads: Int = 1,
   duration: Int = 30,
   warmUp: Boolean = true,
-  warmUpInvocations: Int = 1000,
+  warmUpInvocations: Int = 500,
   verbose: Boolean = false
 ) extends MassiveAttackProps
