@@ -22,7 +22,7 @@ class MethodOps()(implicit ec: ExecutionContext) {
   private val recorder = system.actorOf(Props[MethodStatsRecorder], "test-result-recorder")
   implicit val timeout: Timeout = Timeout(5.seconds)
 
-  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long, parallelism: Int): ScalaFuture[ListBuffer[MethodDurationResult]] = {
+  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => ScalaFuture[Any], testEndTime: Long): ScalaFuture[ListBuffer[MethodDurationResult]] = {
     parallelInvocation.par.foreach { _ =>
       measureFutureDuration(longRunningMethod())
 
@@ -34,7 +34,7 @@ class MethodOps()(implicit ec: ExecutionContext) {
     (recorder ? GetStats).asInstanceOf[Future[ListBuffer[MethodDurationResult]]]
   }
 
-  def measure(parallelInvocation: ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ScalaFuture[ListBuffer[MethodDurationResult]] = {
+  def measure(parallelInvocation: => ParArray[Int], longRunningMethod: () => TwitterFuture[Any], testEndTime: Long): ScalaFuture[ListBuffer[MethodDurationResult]] = {
     parallelInvocation.par.foreach { _ =>
       measureFutureDuration(longRunningMethod())
 
