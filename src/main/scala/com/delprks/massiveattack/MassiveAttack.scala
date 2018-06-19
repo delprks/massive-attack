@@ -7,8 +7,8 @@ import scala.reflect.ClassTag
 
 abstract class MassiveAttack(props: MassiveAttackProps) {
 
-  def measure(longRunningMethod: () => ScalaFuture[_]): ScalaFuture[MassiveAttackResult]
+  def measure(method: () => ScalaFuture[_]): ScalaFuture[MassiveAttackResult]
 
-  def measure[X: ClassTag](longRunningMethod: () => TwitterFuture[_]): ScalaFuture[MassiveAttackResult]
+  def measure[X: ClassTag](method: () => TwitterFuture[_]): ScalaFuture[MassiveAttackResult]
 
 }

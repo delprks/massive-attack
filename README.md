@@ -41,10 +41,10 @@ To test a long running method that returns a Future:
 
   val methodPerformance = new MethodPerformance(testProperties)
 
-  val testResultF: Future[MethodPerformanceResult] = methodPerformance.measure(() => longRunningMethod())
+  val testResultF: Future[MethodPerformanceResult] = methodPerformance.measure(() => method())
   val testResult = Await.result(testResultF, futureSupportTimeout)
   
-  testResult.averageResponseTime must beLessThanOrEqualTo(40)
+  testResult.averageResponseTime should be < 40
 }
 ```
 

@@ -36,11 +36,9 @@ SbtPgp.autoImport.useGpgAgent := true
 
 libraryDependencies ++= Seq(
   "com.twitter" %% "util-core" % "18.5.0",
-  "me.tongfei" % "progressbar" % "0.4.0",
-  "ch.qos.logback" % "logback-classic" % "1.2.3",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
   "com.typesafe.akka" %% "akka-actor" % "2.5.13",
-  "org.specs2" %% "specs2-core" % "3.9.2" % "test"
+  "com.typesafe.akka" %% "akka-testkit" % "2.5.13" % Test,
+  "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
 pomIncludeRepository := {
@@ -74,4 +72,3 @@ connectInput in run := true
 fork in run := true
 
 lazy val root = project in file(".")
-
