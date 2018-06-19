@@ -41,6 +41,9 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
+releaseTagComment := s"Releasing ${(version in ThisBuild).value}"
+releaseCommitMessage := s"= Setting version to ${(version in ThisBuild).value}"
+
 pomIncludeRepository := {
   _ => false
 }
