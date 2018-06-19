@@ -58,7 +58,7 @@ Following properties are available and configurable through `MassiveAttackProper
 
 <h3>invocations</h3>
 
-Specifies how many times the method should be invoked. Defaults to 10,000.
+Specifies how many times the method should be invoked.
  
 <h3>threads</h3>
 
