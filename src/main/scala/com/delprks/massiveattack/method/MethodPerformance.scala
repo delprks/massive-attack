@@ -42,7 +42,7 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
-    val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => method(), testEndTime, props.threads)
+    val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => method(), testEndTime)
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
 
