@@ -42,7 +42,7 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
     val testResultF: ScalaFuture[MethodPerformanceResult] = methodPerformance.measure(() => longRunningMethodWithScalaFuture())
     val testResult = Await.result(testResultF, futureSupportTimeout)
 
-    testResult.averageResponseTime should be < 40
+    testResult.responseTimeAvg should be < 40
   }
 
   "long running method that returns a Twitter Future should have average response times of less than 40ms" in {
@@ -57,6 +57,6 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
     val testResultF: ScalaFuture[MethodPerformanceResult] = methodPerformance.measure(() => longRunningMethodWithTwitterFuture())
     val testResult = Await.result(testResultF, futureSupportTimeout)
 
-    testResult.averageResponseTime should be < 40
+    testResult.responseTimeAvg should be < 40
   }
 }

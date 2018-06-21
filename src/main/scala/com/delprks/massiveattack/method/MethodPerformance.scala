@@ -28,12 +28,12 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
   override def measure(method: () => ScalaFuture[_]): ScalaFuture[MethodPerformanceResult] = {
     if (props.warmUp) {
-      println(s"Warming up the JVM...")
+      println(Console.BLUE + s"Warming up the JVM..." + Console.RESET)
 
       methodOps.warmUpMethod(method, props.warmUpInvocations)
     }
 
-    println(s"Invoking method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads")
+    println(Console.RED + s"Invoking method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads" + Console.RESET)
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
@@ -46,20 +46,22 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
 
-    println(s"Test finished. Duration: ${testDuration / 1000}s")
-    testResultsF map println
+
+    println(Console.GREEN + s"Performance test finished. Duration: ${testDuration / 1000}s" + Console.RESET)
+
+    testResultsF map (_.output())
 
     testResultsF
   }
 
   override def measure[X: ClassTag](method: () => TwitterFuture[_]): ScalaFuture[MethodPerformanceResult] = {
     if (props.warmUp) {
-      println(s"Warming up the JVM...")
+      println(Console.BLUE + s"Warming up the JVM..." + Console.RESET)
 
       methodOps.warmUpMethod(method, props.warmUpInvocations)
     }
 
-    println(s"Invoking method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads")
+    println(Console.RED + s"Invoking method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads" + Console.RESET)
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
@@ -72,8 +74,9 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
     val testDuration: Long = System.currentTimeMillis() - testStartTime
     val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
 
-    println(s"Test finished. Duration: ${testDuration / 1000}s")
-    testResultsF map println
+    println(Console.GREEN + s"Performance test finished. Duration: ${testDuration / 1000}s" + Console.RESET)
+
+    testResultsF map (_.output())
 
     testResultsF
   }
