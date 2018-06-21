@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 class ResultOps()(implicit ec: ExecutionContext) {
 
-  def testResults(results: Future[ListBuffer[MethodDurationResult]]): Future[MethodPerformanceResult] = results.map { response =>
+  def testResults(results: Future[ListBuffer[MethodDurationResult]]): Future[MethodPerformanceResult] = results map { response =>
     val responseDuration = response.map(_.duration.toInt)
     val average = avg(responseDuration)
     val invocationSeconds = response.map(_.endTime / 1000)
@@ -18,6 +18,8 @@ class ResultOps()(implicit ec: ExecutionContext) {
     MethodPerformanceResult(
       responseDuration.min,
       responseDuration.max,
+      percentile(95)(responseDuration),
+      percentile(99)(responseDuration),
       average,
       requestTimesPerSecond.min,
       requestTimesPerSecond.max,
@@ -28,4 +30,10 @@ class ResultOps()(implicit ec: ExecutionContext) {
 
   private def avg(s: Seq[Int]): Int = s.foldLeft((0.0, 1))((acc, i) => (acc._1 + (i - acc._1) / acc._2, acc._2 + 1))._1.toInt
 
+  private def percentile(p: Int)(seq: Seq[Int]) = {
+    val sorted = seq.sorted
+    val k = math.ceil((seq.length - 1) * (p / 100.0)).toInt
+
+    sorted(k)
+  }
 }
