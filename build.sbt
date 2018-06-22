@@ -67,8 +67,6 @@ pomExtra := {
     </developers>
 }
 
-addCommandAlias("release", ";release cross with-defaults")
-
 connectInput in run := true
 
 fork in run := true
