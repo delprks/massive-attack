@@ -50,7 +50,7 @@ To test a long running method that returns a Future:
 
 Which will result in:
 
-![image](https://user-images.githubusercontent.com/8627976/41750744-6f577e3c-75b5-11e8-81bf-03de4c86ae1d.png)
+![image](https://user-images.githubusercontent.com/8627976/41751156-f1213adc-75b7-11e8-96ad-b3b41614e4ac.png)
 
 <h2>Test properties</h2>
 
