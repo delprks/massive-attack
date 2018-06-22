@@ -58,6 +58,7 @@ And (if enabled) generate a report containing the test results:
 
 ![image](https://user-images.githubusercontent.com/8627976/41802774-42b0aaea-767b-11e8-9f16-8ca6fbc8c5c4.png)
 
+
 <h2>Test properties</h2>
 
 Following properties are available and configurable through `MassiveAttackProperties`:
