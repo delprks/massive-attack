@@ -8,5 +8,7 @@ case class MethodPerformanceProps(
   duration: Int = 30,
   warmUp: Boolean = true,
   warmUpInvocations: Int = 500,
-  verbose: Boolean = false
+  verbose: Boolean = false,
+  report: Boolean = false,
+  reportName: Option[String] = None
 ) extends MassiveAttackProps

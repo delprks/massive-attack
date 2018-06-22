@@ -44,8 +44,7 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => method(), testEndTime)
     val testDuration: Long = System.currentTimeMillis() - testStartTime
-    val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
-
+    val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results, props.report, props.reportName)
 
     println(Console.GREEN + s"Performance test finished. Duration: ${testDuration / 1000}s" + Console.RESET)
 
@@ -72,7 +71,7 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     val results: ScalaFuture[ListBuffer[MethodDurationResult]] = methodOps.measure(parallelInvocation, () => method(), testEndTime)
     val testDuration: Long = System.currentTimeMillis() - testStartTime
-    val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results)
+    val testResultsF: ScalaFuture[MethodPerformanceResult] = resultOps.testResults(results, props.report, props.reportName)
 
     println(Console.GREEN + s"Performance test finished. Duration: ${testDuration / 1000}s" + Console.RESET)
 

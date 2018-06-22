@@ -34,7 +34,9 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
     val testProperties = MethodPerformanceProps(
       invocations = 10000,
       threads = 50,
-      duration = 35
+      duration = 35,
+      report = true,
+      reportName = Some("scala_future_performance_test")
     )
 
     val methodPerformance = new MethodPerformance(testProperties)
@@ -49,7 +51,9 @@ class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) wi
     val testProperties = MethodPerformanceProps(
       invocations = 10000,
       threads = 50,
-      duration = 35
+      duration = 35,
+      report = true,
+      reportName = Some("twitter_future_performance_test")
     )
 
     val methodPerformance = new MethodPerformance(testProperties)
