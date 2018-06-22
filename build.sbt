@@ -1,6 +1,6 @@
 name := "massive-attack"
 
-crossScalaVersions := Seq("2.12.6", "2.11.12")
+crossScalaVersions := Seq("2.11.12")
 
 organization := "com.delprks"
 
