@@ -15,17 +15,17 @@ case class MethodPerformanceResult(
 ) extends MassiveAttackResult {
 
   def output(): Unit = {
-    val align = "| %-35s | %-35s | %n"
+    val align = "| %-30s | %-30s | %n"
 
-    printf(Console.YELLOW + "+-------------------------------------+-------------------------------------+%n")
-    printf("| Response Times                      | Requests                            |%n")
-    printf("+-------------------------------------+-------------------------------------+%n")
-    printf(align, s"Min response:     ${responseTimeMin}ms",    s"Invocations:  $requests")
-    printf(align, s"Max response:     ${responseTimeMax}ms",    s"Min requests: ${rpsMin}rps")
-    printf(align, s"95%tile response: ${responseTime95tile}ms", s"Max requests: ${rpsMax}rps")
-    printf(align, s"99%tile response: ${responseTime99tile}ms", s"Avg requests: ${rpsAvg}rps")
-    printf(align, s"Avg response:     ${responseTimeAvg}ms", "")
-    printf("+-------------------------------------+-------------------------------------+%n" + Console.RESET)
+    printf(Console.YELLOW + "+--------------------------------+--------------------------------+%n")
+    printf("| Response Times                 | Requests                       |%n")
+    printf("+--------------------------------+--------------------------------+%n")
+    printf(align, s"Minimum:       ${responseTimeMin}ms", s"Invocations:  $requests")
+    printf(align, s"Maximum:       ${responseTimeMax}ms", s"Minimum:      ${rpsMin}rps")
+    printf(align, s"Average:       ${responseTimeAvg}ms", s"Maximum:      ${rpsMax}rps")
+    printf(align, s"95 percentile: ${responseTime95tile}ms", s"Average:      ${rpsAvg}rps")
+    printf(align, s"99 percentile: ${responseTime99tile}ms", "")
+    printf("+--------------------------------+--------------------------------+%n" + Console.RESET)
   }
 
 }
