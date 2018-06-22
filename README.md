@@ -52,11 +52,11 @@ To test a long running method that returns a Future:
 
 Which will result in:
 
-![image](https://user-images.githubusercontent.com/8627976/41751156-f1213adc-75b7-11e8-96ad-b3b41614e4ac.png)
+![image](https://user-images.githubusercontent.com/8627976/41802711-bef88aba-767a-11e8-9ede-472fc4e59b74.png)
 
 And (if enabled) generate a report containing the test results:
 
-
+![image](https://user-images.githubusercontent.com/8627976/41802774-42b0aaea-767b-11e8-9f16-8ca6fbc8c5c4.png)
 
 <h2>Test properties</h2>
 
