@@ -56,8 +56,7 @@ Which will result in:
 
 And (if enabled) generate a report containing the test results:
 
-![image](https://user-images.githubusercontent.com/8627976/41802774-42b0aaea-767b-11e8-9f16-8ca6fbc8c5c4.png)
-
+![image](https://user-images.githubusercontent.com/8627976/41802827-ca386d86-767b-11e8-9847-d674003454e2.png)
 
 <h2>Test properties</h2>
 
