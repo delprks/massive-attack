@@ -36,7 +36,9 @@ To test a long running method that returns a Future:
   val testProperties = MethodPerformanceProps(
     invocations = 10000,
     threads = 50,
-    duration = 35
+    duration = 35,
+    report = true,
+    reportName = Some("scala_future_performance_test")
   )
 
   val methodPerformance = new MethodPerformance(testProperties)
@@ -51,6 +53,10 @@ To test a long running method that returns a Future:
 Which will result in:
 
 ![image](https://user-images.githubusercontent.com/8627976/41751156-f1213adc-75b7-11e8-96ad-b3b41614e4ac.png)
+
+And (if enabled) generate a report containing the test results:
+
+
 
 <h2>Test properties</h2>
 
@@ -80,6 +86,13 @@ If `warmUp` is set to true, `warmUpInvocations` determines how many times the me
 
 Set this to true if you want to see invocation times when the load test is in progress.
 
+<h3>report</h3>
+
+Set this to true if you want to save test results in a CSV file.
+
+<h3>reportName</h3>
+
+If `report` is set to true, results will be saved to this file. If no `reportName` is specified, one will be generated.
 
 # License
 
