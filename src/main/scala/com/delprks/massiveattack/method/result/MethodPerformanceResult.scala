@@ -11,21 +11,25 @@ case class MethodPerformanceResult(
   rpsMin: Int,
   rpsMax: Int,
   rpsAvg: Int,
-  requests: Int
+  requests: Int,
+  spikes: Int,
+  spikesPercentage: Double,
+  spikesBoundary: Int
 ) extends MassiveAttackResult {
 
   def output(): Unit = {
-    val align = "| %-30s | %-30s | %n"
+    val align = "| %-25s | %-25s | %-25s | %n"
 
-    printf(Console.YELLOW + "+--------------------------------+--------------------------------+%n")
-    printf("| Response Times                 | Requests                       |%n")
-    printf("+--------------------------------+--------------------------------+%n")
-    printf(align, s"Minimum:       ${responseTimeMin}ms", s"Invocations:  $requests")
-    printf(align, s"Maximum:       ${responseTimeMax}ms", s"Minimum:      ${rpsMin}rps")
-    printf(align, s"Average:       ${responseTimeAvg}ms", s"Maximum:      ${rpsMax}rps")
-    printf(align, s"95 percentile: ${responseTime95tile}ms", s"Average:      ${rpsAvg}rps")
-    printf(align, s"99 percentile: ${responseTime99tile}ms", "")
-    printf("+--------------------------------+--------------------------------+%n" + Console.RESET)
+    printf(Console.YELLOW
+         + "+---------------------------+---------------------------+---------------------------+%n")
+    printf("| Response Times            | Requests                  | Spikes                    |%n")
+    printf("+---------------------------+---------------------------+---------------------------+%n")
+    printf(align, s"Minimum:       ${responseTimeMin}ms",    s"Invocations: $requests",    s"Count:      $spikes")
+    printf(align, s"Maximum:       ${responseTimeMax}ms",    s"Minimum:     ${rpsMin}rps", s"Percentage: $spikesPercentage%")
+    printf(align, s"Average:       ${responseTimeAvg}ms",    s"Maximum:     ${rpsMax}rps", s"Boundary:   ${spikesBoundary}ms")
+    printf(align, s"95 percentile: ${responseTime95tile}ms", s"Average:     ${rpsAvg}rps", "")
+    printf(align, s"99 percentile: ${responseTime99tile}ms", "", "")
+    printf("+---------------------------+---------------------------+---------------------------+%n" + Console.RESET)
   }
 
 }
