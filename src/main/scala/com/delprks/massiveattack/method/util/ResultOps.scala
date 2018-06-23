@@ -5,6 +5,7 @@ import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
+import com.delprks.massiveattack.method.MethodPerformanceProps
 import com.delprks.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,28 +13,34 @@ import scala.collection.mutable.ListBuffer
 
 class ResultOps()(implicit ec: ExecutionContext) {
 
-  def testResults(results: Future[ListBuffer[MethodDurationResult]], report: Boolean, reportName: Option[String]): Future[MethodPerformanceResult] = results map { response =>
+  def testResults(results: Future[ListBuffer[MethodDurationResult]], testProps: MethodPerformanceProps): Future[MethodPerformanceResult] = results map { response =>
     val responseDuration = response.map(_.duration.toInt)
     val average = avg(responseDuration)
     val invocationSeconds = response.map(_.endTime / 1000)
     val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
+    val spikeBoundary = (average * testProps.spikeFactor).toInt
+    val spikeCount = responseDuration.count(_ >= spikeBoundary)
+    val spikePercentage: Double = spikeCount * 100.0 / response.size
 
     val rpsAverage = avg(requestTimesPerSecond.toSeq)
 
     val testResult = MethodPerformanceResult(
-      responseDuration.min,
-      responseDuration.max,
-      percentile(95)(responseDuration),
-      percentile(99)(responseDuration),
-      average,
-      requestTimesPerSecond.min,
-      requestTimesPerSecond.max,
-      rpsAverage,
-      response.size
+      responseTimeMin = responseDuration.min,
+      responseTimeMax = responseDuration.max,
+      responseTime95tile = percentile(95)(responseDuration),
+      responseTime99tile = percentile(99)(responseDuration),
+      responseTimeAvg = average,
+      rpsMin = requestTimesPerSecond.min,
+      rpsMax = requestTimesPerSecond.max,
+      rpsAvg = rpsAverage,
+      requests = response.size,
+      spikes = spikeCount,
+      spikesPercentage = spikePercentage,
+      spikesBoundary = spikeBoundary
     )
 
-    if (report) {
-      generateReport(responseDuration, testResult, reportName)
+    if (testProps.report) {
+      generateReport(responseDuration, testResult, testProps.reportName)
     }
 
     testResult
@@ -53,6 +60,8 @@ class ResultOps()(implicit ec: ExecutionContext) {
         s"${testResult.responseTimeMin},${testResult.responseTimeMax},${testResult.responseTimeAvg},${testResult.responseTime95tile},${testResult.responseTime99tile}\n\n" +
         s"Invocations (total),Request min (rps),Request max (rps),Request avg (rps)\n" +
         s"${testResult.requests},${testResult.rpsMin},${testResult.rpsMax},${testResult.rpsAvg}\n\n" +
+        s"Spikes (total),Spikes (%),Spikes boundary\n" +
+        s"${testResult.spikes},${testResult.spikesPercentage},${testResult.spikesBoundary}\n\n" +
         responseDuration.mkString("Response times (ms)\n", "\n", "")
         ).getBytes(StandardCharsets.UTF_8)
     )
