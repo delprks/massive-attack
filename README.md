@@ -82,6 +82,11 @@ This is by default set to `true` to avoid cold start times affecting the test re
 
 If `warmUp` is set to true, `warmUpInvocations` determines how many times the method should be invoked before the load test starts.
 
+<h3>spikeFactor</h3>
+
+This is used to decide which response times should be considered as spikes, by multiplying the average response time and `spikeFactor`. It has the default
+value of `3.0`.
+
 <h3>verbose</h3>
 
 Set this to true if you want to see invocation times when the load test is in progress.
