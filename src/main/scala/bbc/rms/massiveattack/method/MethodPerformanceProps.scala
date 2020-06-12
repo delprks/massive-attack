@@ -1,6 +1,6 @@
-package com.delprks.massiveattack.method
+package bbc.rms.massiveattack.method
 
-import com.delprks.massiveattack.MassiveAttackProps
+import bbc.rms.massiveattack.MassiveAttackProps
 
 case class MethodPerformanceProps(
   invocations: Int = 1000,

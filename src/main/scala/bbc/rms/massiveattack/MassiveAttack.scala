@@ -1,4 +1,4 @@
-package com.delprks.massiveattack
+package bbc.rms.massiveattack
 
 import com.twitter.util.{Future => TwitterFuture}
 

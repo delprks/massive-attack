@@ -1,16 +1,18 @@
-package com.delprks.massiveattack.method
+package bbc.rms.massiveattack.method
 
-import com.delprks.massiveattack.method.result.MethodPerformanceResult
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future => ScalaFuture}
 import com.twitter.util.{Future => TwitterFuture}
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
+import bbc.rms.massiveattack.method.result.MethodPerformanceResult
+import org.scalatest.wordspec.AnyWordSpecLike
 
 class MethodPerformanceSpec extends TestKit(ActorSystem("MassiveAttackSpec")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+  with AnyWordSpecLike with Matchers with BeforeAndAfterAll {
 
   protected lazy val futureSupportTimeout: Duration = 30.seconds
 

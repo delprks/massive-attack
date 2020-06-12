@@ -1,74 +1,80 @@
-name := "massive-attack"
+import sbt.Keys.pomExtra
+import sbt.{Classpaths, Test}
 
-crossScalaVersions := Seq("2.12.6", "2.11.12")
+ThisBuild / organization := "bbc.rms"
+ThisBuild / scalaVersion := "2.13.2"
+ThisBuild / name := "massive-attack"
 
-organization := "com.delprks"
+crossScalaVersions := Seq("2.13.2", "2.12.8")
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8")
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
-publishTo := {
-  val isSnapshotValue = isSnapshot.value
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshotValue) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+resolvers ++= Seq("BBC Artifactory" at "https://artifactory.dev.bbc.co.uk/artifactory/repo/") :+ Classpaths.typesafeReleases
 
-publishMavenStyle := true
-
-publishArtifact in Test := false
-
-parallelExecution in Test := false
-
-releaseCrossBuild := true
-
-sbtrelease.ReleasePlugin.autoImport.releasePublishArtifactsAction := PgpKeys.publishSigned.value
-
-sbtrelease.ReleasePlugin.autoImport.releaseCrossBuild := false
-
-SbtPgp.autoImport.useGpg := true
+lazy val mavenStyleSettings = Seq(
+  publishMavenStyle := true,
+  pomIncludeRepository := {
+    _ => false
+  },
+  pomExtra := {
+    <url>https://github.com/delprks/massive-attack</url>
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <scm>
+        <url>git@github.com:delprks/massive-attack.git</url>
+        <connection>scm:git@github.com:delprks/massive-attack.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>delprks</id>
+          <name>Daniel Parks</name>
+          <url>http://github.com/delprks</url>
+        </developer>
+      </developers>
+  }
+)
 
 SbtPgp.autoImport.useGpgAgent := true
 
-libraryDependencies ++= Seq(
-  "com.twitter" %% "util-core" % "18.5.0",
-  "com.typesafe.akka" %% "akka-actor" % "2.5.13",
-  "com.typesafe.akka" %% "akka-testkit" % "2.5.13" % Test,
-  "org.scalatest" %% "scalatest" % "3.0.5" % Test
+lazy val publishSettings = Seq(
+  version := scala.util.Properties.envOrElse("BUILD_VERSION", "0.1-SNAPSHOT"),
+  publishArtifact in (Test, packageBin) := true,
+  publishMavenStyle := true,
+  publishTo := Some("BBC Repository" at "https://artifactory.dev.bbc.co.uk/artifactory/int-bbc-releases"),
+  credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 )
 
-releaseTagComment := s"Releasing ${(version in ThisBuild).value}"
-releaseCommitMessage := s"= Setting version to ${(version in ThisBuild).value}"
+lazy val testSettings = Seq(
+  Test / publishArtifact := false,
+  Test / parallelExecution := false
+)
 
-pomIncludeRepository := {
-  _ => false
-}
 
-pomExtra := {
-  <url>https://github.com/delprks/massive-attack</url>
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
-    <scm>
-      <url>git@github.com:delprks/massive-attack.git</url>
-      <connection>scm:git@github.com:delprks/massive-attack.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>delprks</id>
-        <name>Daniel Parks</name>
-        <url>http://github.com/delprks</url>
-      </developer>
-    </developers>
-}
+libraryDependencies ++= Seq(
+  "com.twitter" %% "util-core" % "20.5.0",
+  "com.typesafe.akka" %% "akka-actor" % "2.6.5",
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.5" % Test,
+  "org.scalatest" %% "scalatest" % "3.1.2" % Test
+) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+  case Some((2, major)) if major <= 12 =>
+    Seq()
+  case _ =>
+    Seq("org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0")
+})
 
-connectInput in run := true
 
-fork in run := true
+run /connectInput := true
 
-lazy val root = project in file(".")
+run / fork := true
+
+lazy val root = (project in file("."))
+  .settings(publishSettings)
+  .settings(testSettings)
+  .settings(mavenStyleSettings)

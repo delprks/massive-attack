@@ -1,4 +1,4 @@
-package com.delprks.massiveattack.method.result
+package bbc.rms.massiveattack.method.result
 
 import akka.actor.Actor
 
