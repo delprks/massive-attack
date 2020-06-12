@@ -1,7 +1,6 @@
-package com.delprks.massiveattack.method.util
+package bbc.rms.massiveattack.method.util
 
 import akka.actor.{ActorSystem, Props}
-import com.delprks.massiveattack.method.result.{GetStats, MethodDurationResult, MethodStatsRecorder}
 import com.twitter.util.{Future => TwitterFuture}
 
 import scala.collection.mutable.ListBuffer
@@ -11,6 +10,7 @@ import scala.reflect.ClassTag
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import bbc.rms.massiveattack.method.result.{GetStats, MethodDurationResult, MethodStatsRecorder}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

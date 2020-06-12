@@ -1,12 +1,12 @@
-package com.delprks.massiveattack.method.util
+package bbc.rms.massiveattack.method.util
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-import com.delprks.massiveattack.method.MethodPerformanceProps
-import com.delprks.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
+import bbc.rms.massiveattack.method.MethodPerformanceProps
+import bbc.rms.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable.ListBuffer
@@ -15,7 +15,8 @@ class ResultOps()(implicit ec: ExecutionContext) {
 
   def testResults(results: Future[ListBuffer[MethodDurationResult]], testProps: MethodPerformanceProps): Future[MethodPerformanceResult] = results map { response =>
     val responseDuration = response.map(_.duration.toInt)
-    val average = avg(responseDuration)
+    val responseDurationSeq = responseDuration.toSeq
+    val average = avg(responseDurationSeq)
     val invocationSeconds = response.map(_.endTime / 1000)
     val requestTimesPerSecond = invocationSeconds.groupBy(identity).map(_._2.size)
     val spikeBoundary = (average * testProps.spikeFactor).toInt
@@ -27,8 +28,8 @@ class ResultOps()(implicit ec: ExecutionContext) {
     val testResult = MethodPerformanceResult(
       responseTimeMin = responseDuration.min,
       responseTimeMax = responseDuration.max,
-      responseTime95tile = percentile(95)(responseDuration),
-      responseTime99tile = percentile(99)(responseDuration),
+      responseTime95tile = percentile(95)(responseDurationSeq),
+      responseTime99tile = percentile(99)(responseDurationSeq),
       responseTimeAvg = average,
       rpsMin = requestTimesPerSecond.min,
       rpsMax = requestTimesPerSecond.max,
