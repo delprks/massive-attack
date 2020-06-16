@@ -2,7 +2,8 @@ import sbt.Keys.pomExtra
 import sbt.{Classpaths, Test}
 
 ThisBuild / organization := "bbc.rms"
-ThisBuild / scalaVersion := "2.13.2"
+ThisBuild / scalaVersion := "2.12.2"
+//  "2.13.2" TODO federico cocco 16/06/2020: Cannot crossbuild. Update to 2.13 once all projects using this library are 2.13 too
 ThisBuild / name := "massive-attack"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8")
