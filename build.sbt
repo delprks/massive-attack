@@ -5,8 +5,6 @@ ThisBuild / organization := "bbc.rms"
 ThisBuild / scalaVersion := "2.13.2"
 ThisBuild / name := "massive-attack"
 
-crossScalaVersions := Seq("2.13.2", "2.12.8")
-
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8")
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
