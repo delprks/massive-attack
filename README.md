@@ -5,27 +5,17 @@
 
 [![image](https://upload.wikimedia.org/wikipedia/en/a/a7/MassiveAttackBlueLines.jpg)](https://en.wikipedia.org/wiki/Blue_Lines)
 
-`massive-attack` is a simple and configurable load generator test tool written in Scala originally to test Apache Thrift endpoints, but it can be 
-used to benchmark any method that returns a Scala or Twitter `Future`.
 
-<h2>Why?</h2>
+Proprietor: RMS
 
-Because I needed to load test a Thrift endpoint in one of my APIs, and could not find an easy to use tool after looking around for days, at least
-not one that did not require me to develop JMeter plugins, or one that has been updated in the past few years.
- 
-<h2>How?</h2>
+Load generator test tool written in Scala used to benchmark any method that returns a Scala or Twitter `Future`.
+Project forked from [massive-attack](https://github.com/delprks/massive-attack) project created and mantained by [Daniel Parks](https://github.com/delprks)
 
-So I decided to create one which is easy to use: 
-
-1. It can easily be added as a dependency to your API or application
-2. It is configurable as much or as little as you need it to be
-3. It is extensible
-
-<h2>Usage</h2>
+## Usage
 
 1. Add it as a dependency to `build.sbt`:
 
-`libraryDependencies ++= Seq("com.delprks" %% "massive-attack" % "1.0.0" % "test")`
+`libraryDependencies += "bbc.rms" %% "massive-attack" % <release> % "test")`
 
 2. Create your test in [ScalaTest](http://www.scalatest.org) or [Specs2](https://etorreborre.github.io/specs2) (this library might change to be a testing framework in future)
 
@@ -58,36 +48,36 @@ And (if enabled) generate a report containing the test results:
 
 ![image](https://user-images.githubusercontent.com/8627976/41814268-92468eac-773f-11e8-8076-88b4ef9e17e1.png)
 
-<h2>Test properties</h2>
+## Test properties
 
 Following properties are available and configurable through `MassiveAttackProperties`:
 
-<h3>invocations</h3>
+### invocations
 
 Specifies how many times the method should be invoked.
  
-<h3>threads</h3>
+### threads
 
 You can set how many threads you want to run the load test on - beware that Thrift clients can run only on single threads.
 
-<h3>duration</h3>
+### duration
 
 Specifies how long the method should be tested for in seconds - whichever comes first (duration or invocations) determines the length of the test.
 
-<h3>warmUp</h3>
+### warmUp
 
 This is by default set to `true` to avoid cold start times affecting the test results - set it to false if you want to test cold starts.
 
-<h3>warmUpInvocations</h3>
+### warmUpInvocations
 
 If `warmUp` is set to true, `warmUpInvocations` determines how many times the method should be invoked before the load test starts.
 
-<h3>spikeFactor</h3>
+### spikeFactor
 
 This is used to decide which response times should be considered as spikes, by multiplying the average response time and `spikeFactor`. It has the default
 value of `3.0`.
 
-<h3>verbose</h3>
+### verbose
 
 Set this to true if you want to see invocation times when the load test is in progress.
 
@@ -95,10 +85,10 @@ Set this to true if you want to see invocation times when the load test is in pr
 
 Set this to true if you want to save test results in a CSV file.
 
-<h3>reportName</h3>
+###  reportName
 
 If `report` is set to true, results will be saved to this file. If no `reportName` is specified, one will be generated.
 
 # License
 
-`massive-attack` is open source software released under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0).
+original [massive-attack](https://github.com/delprks/massive-attack) is an open source software released under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0).

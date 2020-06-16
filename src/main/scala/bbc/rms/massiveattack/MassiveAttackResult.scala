@@ -1,4 +1,4 @@
-package com.delprks.massiveattack
+package bbc.rms.massiveattack
 
 trait MassiveAttackResult {
   def toString: String

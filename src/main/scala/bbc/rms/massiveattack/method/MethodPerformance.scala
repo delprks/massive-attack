@@ -1,19 +1,20 @@
-package com.delprks.massiveattack.method
+package bbc.rms.massiveattack.method
 
 import java.util.concurrent.Executors
 
 import akka.util.Timeout
-import com.delprks.massiveattack.MassiveAttack
-import com.delprks.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
-import com.delprks.massiveattack.method.util.{MethodOps, ResultOps}
+import bbc.rms.massiveattack.MassiveAttack
+import bbc.rms.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
+import bbc.rms.massiveattack.method.util.{MethodOps, ResultOps}
+import scala.collection.parallel.CollectionConverters._
+
 
 import scala.collection.mutable.ListBuffer
-import scala.collection.parallel.ForkJoinTaskSupport
-import scala.collection.parallel.mutable.ParArray
 import com.twitter.util.{Future => TwitterFuture}
 
+import scala.collection.parallel.ForkJoinTaskSupport
+import scala.collection.parallel.mutable.ParArray
 import scala.concurrent.duration._
-import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 import scala.reflect.ClassTag
 
@@ -37,8 +38,8 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
-    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
-    val forkJoinPool = new ForkJoinPool(props.threads)
+    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toArray.par
+    val forkJoinPool = new java.util.concurrent.ForkJoinPool(props.threads)
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
@@ -62,10 +63,11 @@ class MethodPerformance(props: MethodPerformanceProps = MethodPerformanceProps()
 
     println(Console.RED + s"Invoking method ${props.invocations} times - or maximum ${props.duration} seconds - on ${props.threads} threads" + Console.RESET)
 
+
     val testStartTime = System.currentTimeMillis()
     val testEndTime = testStartTime + props.duration * 1000
-    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toParArray
-    val forkJoinPool = new scala.concurrent.forkjoin.ForkJoinPool(props.threads)
+    val parallelInvocation: ParArray[Int] = (1 to props.invocations).toArray.par
+    val forkJoinPool = new java.util.concurrent.ForkJoinPool(props.threads)
 
     parallelInvocation.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 

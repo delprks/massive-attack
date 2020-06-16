@@ -1,6 +1,6 @@
-package com.delprks.massiveattack.method.result
+package bbc.rms.massiveattack.method.result
 
-import com.delprks.massiveattack.MassiveAttackResult
+import bbc.rms.massiveattack.MassiveAttackResult
 
 case class MethodPerformanceResult(
   responseTimeMin: Int,
