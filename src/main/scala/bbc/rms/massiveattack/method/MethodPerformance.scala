@@ -6,8 +6,7 @@ import akka.util.Timeout
 import bbc.rms.massiveattack.MassiveAttack
 import bbc.rms.massiveattack.method.result.{MethodDurationResult, MethodPerformanceResult}
 import bbc.rms.massiveattack.method.util.{MethodOps, ResultOps}
-// TODO comment in below when version gets bumped to 2.13
-//import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel.CollectionConverters._
 
 
 import scala.collection.mutable.ListBuffer
