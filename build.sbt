@@ -72,7 +72,7 @@ run /connectInput := true
 
 run / fork := true
 
-lazy val root = (project in file("."))
+lazy val `massive-attack` = (project in file("."))
   .settings(publishSettings)
   .settings(testSettings)
   .settings(mavenStyleSettings)
